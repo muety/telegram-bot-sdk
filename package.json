@@ -1,0 +1,23 @@
+{
+  "name": "telegram-bot-sdk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^4.11.1",
+    "unirest": "^0.4.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/n1try/telegram-bot-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/n1try/telegram-bot-sdk/issues"
+  },
+  "homepage": "https://github.com/n1try/telegram-bot-sdk#readme"
+}
