@@ -6,7 +6,7 @@ This library is not finished at all. It is in very early depelopment stage and d
 * Support **Webhook mode** by introducing an Express webserver to listen on incoming requests from Telegram and let the SDK's users decide to either use polling mode or Webhook mode using a parameter in the *getUpdates* method
 * Implement all **classes** from https://core.telegram.org/bots/api#available-types with their respective parameters as JavaScript classes (ES6 syntax)
 * Implement all **methods** from https://core.telegram.org/bots/api#available-methods
-* Make all methods (e.g. *getUpdates*) return proper class objects (e.g. *Message* or *InlineQueryResult*) instead of plain JSON objects
+* Make all methods (e.g. *getUpdates*) return **proper class objects** (e.g. *Message* or *InlineQueryResult*) instead of plain JSON objects
 
 ## Usage
 ### Initialization and polling for updates
@@ -72,4 +72,4 @@ bot.answerInlineQuery(query.id, [answer], (result) => {
 ```
 
 ## Contribute
-Well, yes, we're just at the end. There are no more methods, yet. So again, **please help me finish this library**, since I don't have enough time to do it alone :-)
+Well, yes, we're just at the end. There are no more methods, yet. So again, **please help me finish this library**, since I don't have enough time to do it alone and make this the first and only Node.js library for Telegram bots (see https://core.telegram.org/bots/samples) :-)
