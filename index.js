@@ -1,7 +1,9 @@
 "use strict";
 
 const unirest = require('unirest')
-    , _ = require('lodash');
+    , _ = require('lodash')
+    , InlineQuery = require('./Classes/InlineQuery')
+    , Message = require('./Classes/Message');
 
 const API_BASE_URL = 'https://api.telegram.org/bot{token}/',
     API_GET_UPDATES = 'getUpdates?offset={offset}&timeout=60',
@@ -21,8 +23,8 @@ function _getUpdates() {
         var result = JSON.parse(response.raw_body).result;
         if (result.length > 0) {
             for (var i in result) {
-                if (result[i].message) _processMessage(result[i].message);
-                else if (result[i].inline_query && result[i].inline_query.query.length) _inlineQueryCallback(result[i].inline_query);
+                if (result[i].message) _processMessage(_.assign(new Message, result[i].message, {chat_id: result[i].message.chat.id}));
+                else if (result[i].inline_query && result[i].inline_query.query.length) _inlineQueryCallback(_.assign(new InlineQuery, result[i].inline_query));
             }
 
             offset = parseInt(result[result.length - 1]['update_id']) + 1; // update max offset
@@ -86,7 +88,8 @@ module.exports = function (token, commandCallbacks, nonCommandCallback, inlineQu
             KeyboardButton: require('./Classes/KeyboardButton'),
             InputTextMessageContent: require('./Classes/InputTextMessageContent'),
             InlineQueryResultArticle: require('./Classes/InlineQueryResultArticle'),
-            Message: require('./Classes/Message')
+            Message: Message,
+            InlineQuery: InlineQuery
         },
         setCommandCallbacks: function (commandCallbacks) {
             _commandCallbacks = commandCallbacks;
