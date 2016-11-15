@@ -1,6 +1,6 @@
 # telegram-bot-sdk
 ## Important notice
-This library is not finished at all. It is in very early depelopment stage and does only support a tiny subset of the APIs capabilities, yet. Further some features may not be implemented completely. Until now I have only implemented the functionality I needed for a small bot project. Please feel free to **contribute to this library** by incrementally extending it with more functionality. The following things need to get done.
+This library is not finished at all. __This is work in progress.__ It is in very early depelopment stage and does only support a tiny subset of the APIs capabilities, yet. Further some features may not be implemented completely. Until now I have only implemented the functionality I needed for a small bot project. Please feel free to **contribute to this library** by incrementally extending it with more functionality. The following things need to get done.
 
 ## To do
 * Support **Webhook mode** by introducing an Express webserver to listen on incoming requests from Telegram and let the SDK's users decide to either use polling mode or Webhook mode using a parameter in the *getUpdates* method
