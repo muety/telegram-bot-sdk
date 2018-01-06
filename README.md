@@ -1,15 +1,15 @@
 # telegram-bot-sdk
-## Important notice
-This library is not finished at all. __This is work in progress.__ It is in very early depelopment stage and does only support a tiny subset of the APIs capabilities, yet. Further some features may not be implemented completely. Until now I have only implemented the functionality I needed for a small bot project. Please feel free to **contribute to this library** by incrementally extending it with more functionality. The following things need to get done.
+## ⚠️ Deprecation
+This library is __deprecated__! We recommend to use  [telegraf/telegraf](https://github.com/telegraf/telegraf) instead.
 
 ## To do
-* Support **Webhook mode** by introducing an Express webserver to listen on incoming requests from Telegram and let the SDK's users decide to either use polling mode or Webhook mode using a parameter in the *getUpdates* method
+* Implement HTTPS support for webhook mode
 * Implement all **classes** from https://core.telegram.org/bots/api#available-types with their respective parameters as JavaScript classes (ES6 syntax)
 * Implement all **methods** from https://core.telegram.org/bots/api#available-methods
 * Make all methods (e.g. *getUpdates*) return **proper class objects** (e.g. *Message* or *InlineQueryResult*) instead of plain JSON objects
 
 ## Usage
-### Initialization and polling for updates
+### Initialization
 ```javascript
 // Define functions helpCommand, otherCommand, nonCommandCallback and inlineQueryCallback here
 const commands = {
@@ -18,8 +18,8 @@ const commands = {
 };
 
 const bot = require('telegram-bot-sdk')('yourTokenHere', commands, nonCommandCallback, inlineQueryCallback);
-bot.getUpdates();
 ```
+
 Initializing the module takes 5 paramters (one optional).
 * `token` - Your bot's token you received from the BotFather
 * `commands` - An object of mapping commands (e.g. *help* for the */help* command) to functions
@@ -31,6 +31,17 @@ Initializing the module takes 5 paramters (one optional).
 * `initialOffset` - Optional. Specific offset (https://core.telegram.org/bots/api#getupdates) to receive messages for. Default is 0.
 
 If a new message arrived at Telegram, either one of your command methods, the nonCommand method or the inlineQuery method will be invoked.
+
+### Getting updates
+You can either use _long-polling_ or _webhooks_ to get updates from the Telegram API. To get more details, please read the Telegram Bot API docs. _Webhook_ mode is the recommended way for production use. However, since it requires a secured HTTPS connection, you will need an SSL certificate as well as a constant IP or domain name for your bot's webserver. Unfortunately, SSL support is not implemented, yet (see _To Do_ section), so you will need a reverse proxy (like nginx or [Caddy](https://caddyserver.com)) between your bot and the internet, that handles encryption for you. 
+
+__TL:DR:__ If you're experienced, webhook mode with a reverse proxy is the way to go. However, if that's too complicated, you can also use long-polling mode with way less effort.
+
+```javascript
+// Start listening or polling for updates (use only one of the following lines!)
+bot.listen(3000, 'your_bots_token') // Webhook-mode (recommended) (port, path)
+bot.getUpdates(); // Polling-mode
+```
 
 ### Sending a message
 ```javascript

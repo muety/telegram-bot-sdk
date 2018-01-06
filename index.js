@@ -1,29 +1,31 @@
 "use strict";
 
-const unirest = require('unirest')
-    , _ = require('lodash')
-    , InlineQuery = require('./Classes/InlineQuery')
-    , Message = require('./Classes/Message');
+const unirest = require('unirest'),
+    app = require('express')(),
+    bodyParser = require('body-parser'),
+    _ = require('lodash'),
+    InlineQuery = require('./Classes/InlineQuery'),
+    Message = require('./Classes/Message');
 
 const API_BASE_URL = 'https://api.telegram.org/bot{token}/',
     API_GET_UPDATES = 'getUpdates?offset={offset}&timeout=60',
     API_POST_MESSAGE = 'sendMessage',
     API_ANSWER_INLINE_QUERY = 'answerInlineQuery';
 
-var _token = ''
-    , offset = 0
-    , _commandCallbacks = null
-    , _nonCommandCallback = null
-    , _inlineQueryCallback = null;
+var _token = '',
+    offset = 0,
+    _commandCallbacks = null,
+    _nonCommandCallback = null,
+    _inlineQueryCallback = null;
 
 function _getUpdates() {
-    unirest.get(_resolveApiUrl(API_GET_UPDATES, {token: _token, offset: offset})).end((response) => {
+    unirest.get(_resolveApiUrl(API_GET_UPDATES, { token: _token, offset: offset })).end((response) => {
         if (response.status != 200) return _getUpdates();
 
         var result = JSON.parse(response.raw_body).result;
         if (result.length > 0) {
             for (var i in result) {
-                if (result[i].message) _processMessage(_.assign(new Message, result[i].message, {chat_id: result[i].message.chat.id}));
+                if (result[i].message) _processMessage(_.assign(new Message, result[i].message, { chat_id: result[i].message.chat.id }));
                 else if (result[i].inline_query && result[i].inline_query.query.length) _inlineQueryCallback(_.assign(new InlineQuery, result[i].inline_query));
             }
 
@@ -33,12 +35,28 @@ function _getUpdates() {
     });
 }
 
+function _listen(port, path) {
+    app.use(bodyParser.json());
+    app.post('/' + path, function(req, res) {
+        if (!req.body) return res.status(400).end();
+        var result = req.body;
+        if (result.message) _processMessage(_.assign(new Message, result.message, { chat_id: result.message.chat.id }));
+        else if (result.inline_query && result.inline_query.query.length);
+        else return res.status(400).end();
+        return res.status(200).end();
+    });
+
+    app.listen(port || 3000, function() {
+        console.log('Example app listening on port ' + port || 3000);
+    });
+}
+
 function _sendMessage(messageObject, callback) {
-    unirest.post(_resolveApiUrl(API_POST_MESSAGE, {token: _token})).send(messageObject).end(callback);
+    unirest.post(_resolveApiUrl(API_POST_MESSAGE, { token: _token })).send(messageObject).end(callback);
 }
 
 function _answerInlineQuery(id, results, callback) {
-    unirest.post(_resolveApiUrl(API_ANSWER_INLINE_QUERY, {token: _token})).send({inline_query_id: id, results: JSON.stringify(results)}).end(callback);
+    unirest.post(_resolveApiUrl(API_ANSWER_INLINE_QUERY, { token: _token })).send({ inline_query_id: id, results: JSON.stringify(results) }).end(callback);
 }
 
 function _processMessage(message) {
@@ -46,8 +64,7 @@ function _processMessage(message) {
     if (splitted[0].indexOf("/") != 0) {
         // Non-command
         _nonCommandCallback(message);
-    }
-    else {
+    } else {
         // Command
         var command = splitted[0].substring(1, splitted[0].length);
         if (_commandCallbacks[command] == null) return false; // not a valid command?
@@ -68,7 +85,7 @@ function _getOffset() {
     return offset;
 }
 
-module.exports = function (token, commandCallbacks, nonCommandCallback, inlineQueryCallback, initialOffset) {
+module.exports = function(token, commandCallbacks, nonCommandCallback, inlineQueryCallback, initialOffset) {
     _token = token;
     _commandCallbacks = commandCallbacks;
     _nonCommandCallback = nonCommandCallback;
@@ -77,6 +94,7 @@ module.exports = function (token, commandCallbacks, nonCommandCallback, inlineQu
 
     return {
         getUpdates: _getUpdates,
+        listen: _listen,
         sendMessage: _sendMessage,
         answerInlineQuery: _answerInlineQuery,
         getOffset: _getOffset,
@@ -91,13 +109,13 @@ module.exports = function (token, commandCallbacks, nonCommandCallback, inlineQu
             Message: Message,
             InlineQuery: InlineQuery
         },
-        setCommandCallbacks: function (commandCallbacks) {
+        setCommandCallbacks: function(commandCallbacks) {
             _commandCallbacks = commandCallbacks;
         },
-        setNonCommandCallback: function (nonCommandCallback) {
+        setNonCommandCallback: function(nonCommandCallback) {
             _nonCommandCallback = nonCommandCallback;
         },
-        setInlineQueryCallback: function (inlineQueryCallback) {
+        setInlineQueryCallback: function(inlineQueryCallback) {
             _inlineQueryCallback = inlineQueryCallback;
         }
     }
