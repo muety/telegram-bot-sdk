@@ -42,7 +42,6 @@ function _listen(port, path) {
         var result = req.body;
         if (result.message) _processMessage(_.assign(new Message, result.message, { chat_id: result.message.chat.id }));
         else if (result.inline_query && result.inline_query.query.length) _inlineQueryCallback(_.assign(new InlineQuery, result.inline_query));
-        else return res.status(400).end();
         return res.status(200).end();
     });
 
