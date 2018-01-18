@@ -1,6 +1,6 @@
 {
     "name": "telegram-bot-sdk",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "A JavaScript SDK to interact with the Telegram Bot API (https://core.telegram.org/bots/api) from your Node.js application.",
     "main": "index.js",
     "scripts": {
