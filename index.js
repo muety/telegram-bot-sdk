@@ -35,7 +35,7 @@ function _getUpdates() {
     });
 }
 
-function _listen(port, path) {
+function _listen(port, ip4, path) {
     app.use(bodyParser.json());
     app.post('/' + path, function(req, res) {
         if (!req.body) return res.status(400).end();
@@ -45,7 +45,7 @@ function _listen(port, path) {
         return res.status(200).end();
     });
 
-    app.listen(port || 3000, function() {
+    app.listen(port || 3000, ip4 || '127.0.0.1', function() {
         console.log('Example app listening on port ' + port || 3000);
     });
 }

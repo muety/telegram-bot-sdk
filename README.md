@@ -39,7 +39,7 @@ __TL:DR:__ If you're experienced, webhook mode with a reverse proxy is the way t
 
 ```javascript
 // Start listening or polling for updates (use only one of the following lines!)
-bot.listen(3000, 'your_bots_token') // Webhook-mode (recommended) (port, path)
+bot.listen(3000, '127.0.0.1', 'your_bots_token') // Webhook-mode (recommended) (port, path)
 bot.getUpdates(); // Polling-mode
 ```
 
