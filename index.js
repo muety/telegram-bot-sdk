@@ -73,7 +73,7 @@ function _processMessage(message) {
 
 function _resolveApiUrl(urlRouteTemplate, values) {
     let url = API_BASE_URL + urlRouteTemplate
-    Object.entries().forEach(e => {
+    Object.entries(values).forEach(e => {
         url = url.replace(`{${e[0]}}`, e[1])
     })
     return url
