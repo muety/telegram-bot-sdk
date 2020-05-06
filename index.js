@@ -58,6 +58,7 @@ function _answerInlineQuery(id, results, callback) {
 }
 
 function _processMessage(message) {
+    if (!message || !message.text) return
     let splitted = message.text.split(' ')
     if (splitted[0].indexOf("/") != 0) {
         // Non-command
