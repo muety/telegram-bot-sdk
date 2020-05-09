@@ -17,29 +17,29 @@ let _token = '',
     _nonCommandCallback = null,
     _inlineQueryCallback = null
 
-function _getUpdates() {
-    unirest.get(_resolveApiUrl(API_GET_UPDATES, { token: _token, offset: offset })).end((response) => {
-        if (response.status != 200) return _getUpdates()
+function getUpdates() {
+    unirest.get(resolveApiUrl(API_GET_UPDATES, { token: _token, offset: offset })).end((response) => {
+        if (response.status != 200) return getUpdates()
 
         let result = JSON.parse(response.raw_body).result
         if (result.length > 0) {
             for (let i in result) {
-                if (result[i].message) _processMessage(Object.assign(new Message, result[i].message, { chat_id: result[i].message.chat.id }))
+                if (result[i].message) processMessage(Object.assign(new Message, result[i].message, { chat_id: result[i].message.chat.id }))
                 else if (result[i].inline_query && result[i].inline_query.query.length) _inlineQueryCallback(Object.assign(new InlineQuery, result[i].inline_query))
             }
 
             offset = parseInt(result[result.length - 1]['update_id']) + 1 // update max offset
         }
-        _getUpdates()
+        getUpdates()
     })
 }
 
-function _listen(port, ip4, path) {
+function listen(port, ip4, path) {
     app.use(bodyParser.json())
     app.post('/' + path, function(req, res) {
         if (!req.body) return res.status(400).end()
         let result = req.body
-        if (result.message) _processMessage(Object.assign(new Message, result.message, { chat_id: result.message.chat.id }))
+        if (result.message) processMessage(Object.assign(new Message, result.message, { chat_id: result.message.chat.id }))
         else if (result.inline_query && result.inline_query.query.length) _inlineQueryCallback(Object.assign(new InlineQuery, result.inline_query))
         return res.status(200).end()
     })
@@ -49,15 +49,15 @@ function _listen(port, ip4, path) {
     })
 }
 
-function _sendMessage(messageObject, callback) {
-    unirest.post(_resolveApiUrl(API_POST_MESSAGE, { token: _token })).send(messageObject).end(callback)
+function sendMessage(messageObject, callback) {
+    unirest.post(resolveApiUrl(API_POST_MESSAGE, { token: _token })).send(messageObject).end(callback)
 }
 
-function _answerInlineQuery(id, results, callback) {
-    unirest.post(_resolveApiUrl(API_ANSWER_INLINE_QUERY, { token: _token })).send({ inline_query_id: id, results: JSON.stringify(results) }).end(callback)
+function answerInlineQuery(id, results, callback) {
+    unirest.post(resolveApiUrl(API_ANSWER_INLINE_QUERY, { token: _token })).send({ inline_query_id: id, results: JSON.stringify(results) }).end(callback)
 }
 
-function _processMessage(message) {
+function processMessage(message) {
     if (!message || !message.text) return
     let splitted = message.text.split(' ')
     if (splitted[0].indexOf("/") != 0) {
@@ -72,7 +72,7 @@ function _processMessage(message) {
     return true
 }
 
-function _resolveApiUrl(urlRouteTemplate, values) {
+function resolveApiUrl(urlRouteTemplate, values) {
     let url = API_BASE_URL + urlRouteTemplate
     Object.entries(values).forEach(e => {
         url = url.replace(`{${e[0]}}`, e[1])
@@ -80,8 +80,13 @@ function _resolveApiUrl(urlRouteTemplate, values) {
     return url
 }
 
-function _getOffset() {
+function getOffset() {
     return offset
+}
+
+function registerCustomRoute(method, path, handler) {
+    if (!['get', 'post', 'put', 'delete', 'head', 'options'].includes(method.toLowerCase())) return
+    app[method](path, handler)
 }
 
 module.exports = function(token, commandCallbacks, nonCommandCallback, inlineQueryCallback, initialOffset) {
@@ -92,11 +97,12 @@ module.exports = function(token, commandCallbacks, nonCommandCallback, inlineQue
     offset = initialOffset || 0
 
     return {
-        getUpdates: _getUpdates,
-        listen: _listen,
-        sendMessage: _sendMessage,
-        answerInlineQuery: _answerInlineQuery,
-        getOffset: _getOffset,
+        getUpdates,
+        listen,
+        sendMessage,
+        answerInlineQuery,
+        getOffset,
+        registerCustomRoute,
         classes: {
             InlineKeyboardButton: require('./Classes/InlineKeyboardButton'),
             InlineKeyboard: require('./Classes/InlineKeyboard'),
