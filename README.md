@@ -64,7 +64,12 @@ keyboard.addButton(new bot.classes.KeyboardButton('Button Second Row Left'));
 keyboard.addButton(new bot.classes.KeyboardButton('Button Second Row Center'));
 keyboard.addButton(new bot.classes.KeyboardButton('Button Second Row Right'));
 
-var msg = new bot.classes.Message(originalMessage.chat.id, '*Hello Telegram*', 'Markdown', null, null, null, keyboard);
+var msg = new bot.classes.Message({
+  chat_id: originalMessage.chat.id,
+  text: '*Hello Telegram*',
+  parse_mode: 'Markdown',
+  reply_markup: keyboard
+});
 bot.sendMessage(msg, (err, results) => {
     // do sth.
 });

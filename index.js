@@ -9,6 +9,7 @@ const unirest = require('unirest'),
 const API_BASE_URL = 'https://api.telegram.org/bot{token}/',
     API_GET_UPDATES = 'getUpdates?offset={offset}&timeout=60',
     API_POST_MESSAGE = 'sendMessage',
+    API_POST_DOCUMENT = 'sendDocument',
     API_ANSWER_INLINE_QUERY = 'answerInlineQuery'
 
 let _token = '',
@@ -36,21 +37,34 @@ function getUpdates() {
 
 function listen(port, ip4, path) {
     app.use(bodyParser.json())
-    app.post('/' + path, function(req, res) {
+    app.post('/' + path, function (req, res) {
         if (!req.body) return res.status(400).end()
         let result = req.body
-        if (result.message) processMessage(Object.assign(new Message, result.message, { chat_id: result.message.chat.id }))
+        if (result.message) processMessage(Object.assign(new Message(), result.message, { chat_id: result.message.chat.id }))
         else if (result.inline_query && result.inline_query.query.length) _inlineQueryCallback(Object.assign(new InlineQuery, result.inline_query))
         return res.status(200).end()
     })
 
-    app.listen(port || 3000, ip4 || '127.0.0.1', function() {
+    app.listen(port || 3000, ip4 || '127.0.0.1', function () {
         console.log('Example app listening on port ' + port || 3000)
     })
 }
 
 function sendMessage(messageObject, callback) {
     unirest.post(resolveApiUrl(API_POST_MESSAGE, { token: _token })).send(messageObject).end(callback)
+}
+
+function sendFile(messageObject, callback) {
+    const req = unirest.post(resolveApiUrl(API_POST_DOCUMENT, { token: _token }))
+        .headers({ 'content-type': 'multipart/form-data' })
+
+    Object.keys(messageObject)
+        .filter(key => key !== 'document')
+        .filter(key => !!messageObject[key])
+        .forEach(key => req.field(key, messageObject[key]))
+
+    req.attach('document', messageObject.document)
+    req.end(callback)
 }
 
 function answerInlineQuery(id, results, callback) {
@@ -89,7 +103,7 @@ function registerCustomRoute(method, path, handler) {
     app[method](path, handler)
 }
 
-module.exports = function(token, commandCallbacks, nonCommandCallback, inlineQueryCallback, initialOffset) {
+module.exports = function (token, commandCallbacks, nonCommandCallback, inlineQueryCallback, initialOffset) {
     _token = token
     _commandCallbacks = commandCallbacks
     _nonCommandCallback = nonCommandCallback
@@ -100,6 +114,7 @@ module.exports = function(token, commandCallbacks, nonCommandCallback, inlineQue
         getUpdates,
         listen,
         sendMessage,
+        sendFile,
         answerInlineQuery,
         getOffset,
         registerCustomRoute,
@@ -111,16 +126,16 @@ module.exports = function(token, commandCallbacks, nonCommandCallback, inlineQue
             KeyboardButton: require('./Classes/KeyboardButton'),
             InputTextMessageContent: require('./Classes/InputTextMessageContent'),
             InlineQueryResultArticle: require('./Classes/InlineQueryResultArticle'),
+            InlineQuery: InlineQuery,
             Message: Message,
-            InlineQuery: InlineQuery
         },
-        setCommandCallbacks: function(commandCallbacks) {
+        setCommandCallbacks: function (commandCallbacks) {
             _commandCallbacks = commandCallbacks
         },
-        setNonCommandCallback: function(nonCommandCallback) {
+        setNonCommandCallback: function (nonCommandCallback) {
             _nonCommandCallback = nonCommandCallback
         },
-        setInlineQueryCallback: function(inlineQueryCallback) {
+        setInlineQueryCallback: function (inlineQueryCallback) {
             _inlineQueryCallback = inlineQueryCallback
         }
     }
